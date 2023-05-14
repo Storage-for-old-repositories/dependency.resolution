@@ -11,6 +11,8 @@ const provide = Provider.create(
       ),
       user: ProviderByName.create("user"),
       file: ProviderByName.create("file"),
+      car: "file",
+      wow: "user",
     },
     config: {
       work: "sdf",

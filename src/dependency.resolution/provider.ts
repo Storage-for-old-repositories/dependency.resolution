@@ -2,14 +2,17 @@ import AbstractProvider from "./abstract.provider";
 
 /// TODO: Подумать действительно ли нужен флаг `isSingleton`
 
-type ProviderDependenciesBound = Record<string, AbstractProvider>;
+type ProviderDependenciesBound = Record<
+  string,
+  AbstractProvider | keyof dependencyResolution.GlobalNames
+>;
 
 type ProviderDependenciesResolution<Dependencies> =
   Dependencies extends ProviderDependenciesBound
     ? {
-        [K in keyof Dependencies]: Dependencies[K] extends AbstractProvider<
-          infer R
-        >
+        [K in keyof Dependencies]: Dependencies[K] extends keyof dependencyResolution.GlobalNames
+          ? dependencyResolution.GlobalNames[Dependencies[K]]
+          : Dependencies[K] extends AbstractProvider<infer R>
           ? R
           : never;
       }
