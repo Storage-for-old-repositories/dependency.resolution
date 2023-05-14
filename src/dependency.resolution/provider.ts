@@ -1,13 +1,15 @@
-import { IProvider } from "./interfaces/index";
+import AbstractProvider from "./abstract.provider";
 
 /// TODO: Подумать действительно ли нужен флаг `isSingleton`
 
-type ProviderDependenciesBound = Record<string, IProvider>;
+type ProviderDependenciesBound = Record<string, AbstractProvider>;
 
 type ProviderDependenciesResolution<Dependencies> =
   Dependencies extends ProviderDependenciesBound
     ? {
-        [K in keyof Dependencies]: Dependencies[K] extends IProvider<infer R>
+        [K in keyof Dependencies]: Dependencies[K] extends AbstractProvider<
+          infer R
+        >
           ? R
           : never;
       }
@@ -32,7 +34,7 @@ export default class Provider<
   Provide = unknown,
   Dependencies = ProviderDependenciesBound,
   Config = void
-> extends IProvider<Provide> {
+> extends AbstractProvider<Provide> {
   private _isSingleton = true;
   private _config: Readonly<Config> = undefined!;
 

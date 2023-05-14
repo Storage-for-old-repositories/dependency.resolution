@@ -1,4 +1,4 @@
-import { IProvider } from "./index";
+import AbstractProvider from "./abstract.provider";
 
 declare global {
   namespace dependencyResolution {
@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-export default class ProviderByName<Provide> extends IProvider<Provide> {
+export default class ProviderByName<Provide> extends AbstractProvider<Provide> {
   private constructor(private readonly _token: string) {
     super();
   }
