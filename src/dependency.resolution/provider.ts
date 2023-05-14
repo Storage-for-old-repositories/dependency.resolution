@@ -1,4 +1,6 @@
-import IProvider from "./provider.interface";
+import { IProvider } from "./interfaces/index";
+
+/// TODO: Подумать действительно ли нужен флаг `isSingleton`
 
 type ProviderDependenciesBound = Record<string, IProvider>;
 
@@ -12,7 +14,7 @@ type ProviderDependenciesResolution<Dependencies> =
     : never;
 
 type ProviderResolver<Provide, Dependencies, Config> = (
-  dependencies: Dependencies,
+  dependencies: ProviderDependenciesResolution<Dependencies>,
   config: Config
 ) => Provide | Promise<Provide>;
 
@@ -27,19 +29,19 @@ export interface ProviderSharedOptions<Dependencies> {
 }
 
 export default class Provider<
-  Provide = any,
-  Dependencies = any,
-  Resolver = any,
+  Provide = unknown,
+  Dependencies = ProviderDependenciesBound,
   Config = void
-> implements IProvider<Provide>
-{
+> extends IProvider<Provide> {
   private _isSingleton = true;
   private _config: Readonly<Config> = undefined!;
 
   private constructor(
     private readonly _dependencies: Readonly<Dependencies>,
-    private readonly _resolver: Resolver
-  ) {}
+    private readonly _resolver: ProviderResolver<Provide, Dependencies, Config>
+  ) {
+    super();
+  }
 
   public static create<
     Provide,
@@ -48,39 +50,27 @@ export default class Provider<
   >(
     options: ProviderSharedOptions<Dependencies> &
       Partial<ProviderOptions<Config>>,
-    resolver: ProviderResolver<
-      Provide,
-      ProviderDependenciesResolution<Dependencies>,
-      Config
-    >
+    resolver: ProviderResolver<Provide, Dependencies, Config>
   ) {
     const dependencies = { ...options.dependencies };
-    const provider = new Provider<
-      Provide,
-      Dependencies,
-      typeof resolver,
-      Config
-    >(dependencies, resolver);
-    provider.applyOptionsFrom(options);
-    return provider as IProvider<Provide>;
+    const provider = new Provider(dependencies, resolver);
+    return provider.applyOptions(options);
   }
 
-  private applyOptionsFrom(options: Partial<ProviderOptions<Config>>) {
+  private applyOptions(options: Partial<ProviderOptions<Config>>): this {
     this._config = options.config!;
     if (typeof options.isSingleton === "boolean") {
       this._isSingleton = options.isSingleton;
     }
+    return this;
   }
 
   public create(options?: Partial<ProviderOptions<Config>>) {
-    const provider = new Provider<Provide, Dependencies, Resolver, Config>(
-      this._dependencies,
-      this._resolver
-    );
+    const provider = new Provider(this._dependencies, this._resolver);
     if (options) {
-      provider.applyOptionsFrom(options);
+      return provider.applyOptions(options);
     }
-    return provider as IProvider<Provide>;
+    return provider;
   }
 
   public get dependencies() {
@@ -99,27 +89,3 @@ export default class Provider<
     return this._config;
   }
 }
-
-// const provide = Provider.create(
-//   {
-//     dependencies: {
-//       file: Provider.create(
-//         {
-//           dependencies: {},
-//         },
-//         async () => "hello"
-//       ),
-//       auto: Provider.create(
-//         {
-//           dependencies: {},
-//         },
-//         async () => [["hello"]]
-//       ),
-//       urb: {} as IProvider<1 | 2>,
-//     },
-//     config: {
-//       work: "sdf",
-//     },
-//   },
-//   async (d, c) => {}
-// );
