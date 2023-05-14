@@ -67,10 +67,7 @@ export default class Provider<
 
   public create(options?: Partial<ProviderOptions<Config>>) {
     const provider = new Provider(this._dependencies, this._resolver);
-    if (options) {
-      return provider.applyOptions(options);
-    }
-    return provider;
+    return provider.applyOptions(options || {});
   }
 
   public get dependencies() {
