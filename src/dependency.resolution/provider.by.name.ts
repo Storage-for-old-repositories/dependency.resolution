@@ -1,6 +1,6 @@
-import AbstractProvider from "./abstract.provider";
 import { ArleadyBindProviderError } from "./errors";
-import Provider from "./provider";
+import AbstractProvider from "./abstract.provider";
+import type Provider from "./provider";
 
 declare global {
   namespace dependencyResolution {
