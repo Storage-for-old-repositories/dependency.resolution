@@ -20,17 +20,19 @@ type ProvidersAll = {
 };
 
 export default class ProviderByName<Provide> extends AbstractProvider<Provide> {
-  private constructor(private readonly _token: string) {
+  private constructor(
+    private readonly _token: keyof dependencyResolution.GlobalNames
+  ) {
     super();
   }
 
-  static create<Token extends keyof dependencyResolution.GlobalNames>(
+  public static create<Token extends keyof dependencyResolution.GlobalNames>(
     token: Token
   ) {
     return new ProviderByName<dependencyResolution.GlobalNames[Token]>(token);
   }
 
-  static bindProvider<
+  public static bindProvider<
     Token extends keyof dependencyResolution.GlobalNames,
     P extends Provider<dependencyResolution.GlobalNames[Token]>
   >(token: Token, provider: P) {
@@ -40,7 +42,7 @@ export default class ProviderByName<Provide> extends AbstractProvider<Provide> {
     bindsProviders.set(token, provider);
   }
 
-  static getBindsProviders() {
+  public static getBindsProviders() {
     const binds: Partial<
       Record<keyof dependencyResolution.GlobalNames, Provider<unknown>>
     > = {};
@@ -50,7 +52,7 @@ export default class ProviderByName<Provide> extends AbstractProvider<Provide> {
     return binds as Partial<ProvidersAll>;
   }
 
-  get token() {
+  public get token() {
     return this._token;
   }
 }

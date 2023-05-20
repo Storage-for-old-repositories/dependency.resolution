@@ -1,7 +1,5 @@
 import AbstractProvider from "./abstract.provider";
 
-/// TODO: Подумать действительно ли нужен флаг `isSingleton`
-
 type ProviderDependenciesBound = Record<
   string,
   AbstractProvider | keyof dependencyResolution.GlobalNames
@@ -42,8 +40,8 @@ export default class Provider<
   private _config: Readonly<Config> = undefined!;
 
   private constructor(
-    private readonly _dependencies: Readonly<Dependencies>,
-    private readonly _resolver: ProviderResolver<Provide, Dependencies, Config>
+    public readonly dependencies: Readonly<Dependencies>,
+    public readonly resolver: ProviderResolver<Provide, Dependencies, Config>
   ) {
     super();
   }
@@ -71,16 +69,8 @@ export default class Provider<
   }
 
   public create(options?: Partial<ProviderOptions<Config>>) {
-    const provider = new Provider(this._dependencies, this._resolver);
+    const provider = new Provider(this.dependencies, this.resolver);
     return provider.applyOptions(options || {});
-  }
-
-  public get dependencies() {
-    return this._dependencies;
-  }
-
-  public get resolver() {
-    return this._resolver;
   }
 
   public get isSingleton() {
