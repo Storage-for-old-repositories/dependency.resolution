@@ -1,10 +1,9 @@
 export default class Chain<K, V> {
-  private readonly _valuesSubscribers = new Map<K, V>();
   private readonly _children: Chain<K, V>[] = [];
-  private constructor() {}
+  private constructor(private readonly _valuesSubscribers: Map<K, V>) {}
 
   public static create<K, V>() {
-    return new Chain<K, V>();
+    return new Chain<K, V>(new Map());
   }
 
   public has(key: K) {
@@ -25,7 +24,9 @@ export default class Chain<K, V> {
   }
 
   public forkChain() {
-    const chain = new Chain<K, V>();
+    const chain = new Chain<K, V>(
+      new Map([...this._valuesSubscribers.entries()])
+    );
     this._children.push(chain);
     return chain;
   }
