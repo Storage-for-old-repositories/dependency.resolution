@@ -1,4 +1,11 @@
-type DependenciesConfig<Name extends string> = {};
+/**
+ * Объект с параметрами каждой зависимости, в данный момент не используется, тоесть
+ * конфиг для каждой зависимости пустой
+ *
+ * Ограничение `Name extends string` добавленно, чтобы иметь возможность передать
+ * имя ключа (имя зависимости) в будущем. В данный момент тоже не испольуется
+ */
+export type DependenciesConfig<_Name extends string = string> = {};
 
 const enum DependencyResolvingStatus {
   Process,
@@ -86,6 +93,15 @@ export class DependencyRuntime<Dependencies extends Record<string, any>> {
       this.resolvers.push(resolve);
       this.rejectors.push(reject);
     });
+  }
+
+  async toPromiseTimeout(timeout: number) {
+    return await Promise.race([
+      this.toPromise(),
+      new Promise<Dependencies>((_, reject) =>
+        setTimeout(() => reject(new Error("time is over")), timeout)
+      ),
+    ]);
   }
 
   private validateStatusIsProcess() {
